@@ -48,8 +48,11 @@ def should_skip(path: Path) -> bool:
         return True
     if path.suffix in (".pyc", ".pyo"):
         return True
-    # 真实业务数据永远不进包
+    # 真实业务数据永远不进包；只有 examples/ 下的合成 CSV 例外——
+    # 它们是"装完就能跑通"的演示数据，仓库里公开可见，不含任何真实经营值。
     if path.suffix.lower() in (".csv", ".xlsx", ".xls", ".db", ".sqlite"):
+        if rel.parts and rel.parts[0] == "examples" and path.suffix.lower() == ".csv":
+            return False
         return True
     # config 下只放模板
     if rel.parts and rel.parts[0] == "config":
@@ -92,8 +95,13 @@ def main():
         print("   …还有 %d 个" % (len(files) - 8))
 
     # 安全检查：确认包里没有真实配置和数据
+    def _is_example_data(f):
+        """examples/ 下的合成 CSV 是演示数据，可以进包；其他数据一律不行。"""
+        rel = f.relative_to(ROOT)
+        return rel.parts and rel.parts[0] == "examples" and f.suffix.lower() == ".csv"
+
     bad = [f for f in files
-           if f.suffix.lower() in (".csv", ".xlsx", ".xls")
+           if (f.suffix.lower() in (".csv", ".xlsx", ".xls") and not _is_example_data(f))
            or (f.parent.name == "config" and f.suffix == ".json"
                and not f.name.endswith(CONFIG_ALLOW_SUFFIX) and f.name not in CONFIG_PUBLIC_FILES)]
     if bad:

@@ -159,6 +159,13 @@ class ReleaseBoundaryTests(unittest.TestCase):
         files = [f.relative_to(package.ROOT).as_posix() for f in package.collect()]
         self.assertFalse(any(p.startswith(("knowledge/", "profiles/", "notes/feishu-kb/")) for p in files))
 
+    def test_examples_csv_ships_but_real_data_does_not(self):
+        """examples/ 的合成 CSV 要进包（否则 zip 用户第一条命令就跑不通）；data/ 一律不进。"""
+        self.assertFalse(package.should_skip(package.ROOT / "examples" / "shop_daily.csv"))
+        self.assertFalse(package.should_skip(package.ROOT / "examples" / "README.md"))
+        self.assertTrue(package.should_skip(package.ROOT / "data" / "normalized" / "shop_daily.csv"))
+        self.assertTrue(package.should_skip(package.ROOT / "data" / "reports" / "x.html"))
+
     def test_packager_rejects_internal_cloud_ids_instead_of_masking_them(self):
         import sys
         from unittest.mock import patch
