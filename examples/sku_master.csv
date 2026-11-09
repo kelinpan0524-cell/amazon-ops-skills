@@ -1,0 +1,4 @@
+sku,asin,oe_number,vehicle_make,vehicle_model,year_from,year_to,position,material,cost,list_price,weight_g,certifications,hs_code
+S1,B0EXAMPLE1,51360-TVA-A00,Honda,Accord,2015,2018,Front Left Lower,Aluminum,12.5,32.0,900,IATF16949,8708999990
+S2,B0EXAMPLE2,54500-1M000,Hyundai,Elantra,2011,2016,Front Right,Steel,28.0,64.0,2100,IATF16949,8708999990
+S3,B0EXAMPLE3,,Toyota,Camry,2007,2011,Front,Steel,9.5,24.0,600,,8708999990

@@ -1,0 +1,7 @@
+{
+  "_comment": "要盯的自有 ASIN（跟卖监控与评论监控共用）。复制成 config/watchlist.json 再填。ASIN 必须是 B0 开头 10 位；note 是给人看的备注，可留空。",
+  "our_asins": [
+    {"asin": "B0XXXXXXXX", "note": "示例：替换成你自己的 ASIN"},
+    {"asin": "B0YYYYYYYY", "note": ""}
+  ]
+}

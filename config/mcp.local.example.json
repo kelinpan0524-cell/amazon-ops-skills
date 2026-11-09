@@ -1,0 +1,12 @@
+{
+  "_comment": "MCP 凭证（本机私密，不进 Git、不进分发包）。环境变量优先，这里是兜底：给拿不到 shell 变量的 GUI 客户端（Trae / WorkBuddy / 豆包桌面版等）用。填完不用重启，脚本每次现读。",
+  "_howto": "把本文件复制成 config/mcp.local.json，在下面的 key 里填自己的密钥；url 一般不用改。",
+  "lingxing": {
+    "url": "https://openmcp.lingxing.com/mcp-servers/lingxing-mcp",
+    "key": ""
+  },
+  "sellersprite": {
+    "url": "https://mcp.sellersprite.com/v2/mcp",
+    "key": ""
+  }
+}

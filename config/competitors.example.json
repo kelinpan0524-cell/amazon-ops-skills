@@ -1,0 +1,7 @@
+{
+  "_comment": "竞对跟踪示例。一行只放一组竞对 ASIN—我方 ASIN；同一竞对对应多个我方款时拆多行。生产通常直接维护 Base 竞对对象表。",
+  "watch": [
+    {"asin": "B0XXXXXXXX", "note": "同行A 主力款（示例，替换为真实 ASIN）", "our_asin": "B0YYYYYYYY", "our_sku": "YOUR_SKU_001"},
+    {"asin": "B0ZZZZZZZZ", "note": "同行B 跟卖嫌疑款（示例，暂未绑定我方款）", "our_asin": "", "our_sku": ""}
+  ]
+}

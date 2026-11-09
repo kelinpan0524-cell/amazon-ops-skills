@@ -1,0 +1,15 @@
+# 运行数据与报告产物（本机生成，不进 Git）
+data/
+dist/
+*.pyc
+__pycache__/
+
+# 本机私密配置：只留 *.example.json 模板
+config/shops.json
+config/targets.json
+config/competitors.json
+config/mcp.local.json
+
+# 系统文件
+.DS_Store
+*.log

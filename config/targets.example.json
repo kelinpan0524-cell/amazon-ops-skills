@@ -1,0 +1,36 @@
+{
+  "_comment": "经营目标与对标基准。target=要争取达到的（人定）；ceiling=红线（超了算异常）；baseline=历史基准（自动从 shop_monthly 算，不建议手填）。null 表示未设定——报告里会显示「未设定」，不假装有目标。",
+  "_updated": "2026-11-01",
+  "company": {
+    "acos_target": 0.15,
+    "acos_ceiling": 0.18,
+    "_acos_note": "target 是常态水平，ceiling 是高线；按自己类目的历史 P50/P75 改",
+    "return_rate_target": 0.06,
+    "return_rate_ceiling": 0.091,
+    "_return_note": "ceiling 0.091 是亚马逊汽配类目官方收费线，别调高",
+    "tacos_target": 0.045,
+    "_tacos_note": "TACOS = 广告花费 ÷ 总销售额；示例 4.5% 属经验值，按自己店改",
+    "annual_revenue_target_usd": 1000000,
+    "_annual_revenue_target_note": "示例值 100 万美金。月度目标 = 年目标 ÷ 12；金额全链路 USD，系统不做任何币种换算。换年或调目标只改这一处。",
+    "_fx_note": "本仓库不做汇率换算：所有金额都是 USD 原值。"
+  },
+  "inventory": {
+    "min_days_of_supply": 21,
+    "danger_days_of_supply": 7,
+    "_note": "min=补货计划线（低于它就排补货）；danger=当天必须处理"
+  },
+  "shops": {
+    "_comment": "店级月目标。可选：不填就按公司月目标平均分；填了就按这里的月目标算达成率。",
+    "_basis": "示例：按各自近 12 个月销售额占比拆分",
+    "shop_a": {
+      "display": "示例店铺 A",
+      "monthly_target_usd": 50000,
+      "share": 0.5
+    },
+    "shop_b": {
+      "display": "示例店铺 B",
+      "monthly_target_usd": 50000,
+      "share": 0.5
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # 故意不装任何第三方包：仓库约定纯标准库（见 CONTRIBUTING）。
+      # 哪天有人偷偷加了 import yaml / requests / numpy，这一步就会直接红，当防线用。
+      - name: 生成本机占位配置
+        run: python3 scripts/setup_local.py --allow-incomplete
+      - name: 架构约束（frontmatter / SKU 列 / USD 口径 / 主动式协议）
+        run: python3 scripts/ci_check.py
+      - name: 全仓自检（单测 + 技能冒烟 + 报告内容 + 文档链接 + 排版）
+        run: python3 scripts/selftest.py
+      - name: 可移植性（占位配置 / 凭证来源优先级）
+        run: python3 scripts/test_portability.py
+      - name: 公开边界（真实配置 / 经营数据 / 公司标识 / 内部云资源）
+        run: python3 scripts/public_boundary_check.py
+      - name: 分发包脱敏预检（不写文件）
+        run: python3 scripts/package_release.py --dry-run

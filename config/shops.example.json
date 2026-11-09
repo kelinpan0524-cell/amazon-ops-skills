@@ -1,0 +1,19 @@
+{
+  "_comment": "店铺组定义模板。复制成 shops.json 再填自己的领星店铺 ID。sids 是逗号分隔字符串，不是数组。",
+  "shops": {
+    "shop_a": {
+      "display": "示例店铺 A",
+      "sids": "YOUR_SID_A1,YOUR_SID_A2",
+      "sites": "US,CA",
+      "operator": "",
+      "seller_names": ["YOUR_SELLER_NAME_A"]
+    },
+    "shop_b": {
+      "display": "示例店铺 B",
+      "sids": "YOUR_SID_B1,YOUR_SID_B2",
+      "sites": "US",
+      "operator": "",
+      "seller_names": ["YOUR_SELLER_NAME_B"]
+    }
+  }
+}

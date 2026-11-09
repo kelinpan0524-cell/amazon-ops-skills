@@ -1,0 +1,94 @@
+# 阈值表：技能里不许写死数字，全部从这里读。
+# 改动只能由每周校准任务做，并且必须在 config/CHANGELOG.md 留一行（改什么、为什么、依据哪条判断）。
+#
+# 【分层规则——读之前必须知道】
+# calibration_status:
+#   未校准 = 行业候选/占位默认值：来自亚马逊公开规则或通用运营经验，
+#            从未用本公司真实数据验过。只用于先跑通流程，不是公司事实。
+#   不适用 = 机制性参数（与经营数据无关，如结案规则），不存在"校准"一说。
+# 【适用边界】当前（2026-11-04）没有已校准的公司数据：
+#   - 领星导出的毛利/成本是未校准参考，不得当准确事实，也不得写死成阈值；
+#   - 库存结论只覆盖 FBA 可售口径，在途与本地仓缺口在脚本输出里逐次披露；
+#   - 任何"未校准"值被用于出建议前，都要先跑 amz-calibration 用真实判断对账。
+
+stockout:
+  # 来源：通用汽配运营经验（卖家社区观察）。注意：这不是官方规则。
+  # 时间窗：按可售天数（连续口径）；样本范围：全 SKU，不分品类。
+  # 边界：只适用于 FBA 可售 ÷（近28天销量）口径；新品（无销量）不适用，本地仓库存不适用。
+  #   low_stock_ratio_vs_28d 是"运营候选预警线"占位值：自然排名/CPC 波动是未校准观察，非官方因果。
+  #   官方"低库存费"（GV43F6S76Y9DHYRH，2024-04-01 起）触发是长期+短期历史供货天数双口径均<28天，
+  #   与本参数不是一回事，本脚本也不判定低库存费资格。
+  sales_window_days: 28             # SKU 级销量窗口；去年同期回补段不进入该窗口
+  days_of_supply_alert: 21        # 可售天数低于这个报警
+  days_of_supply_critical: 10     # 低于这个算急件，当天必须有人处理
+  low_stock_ratio_vs_28d: 28      # 运营候选预警线（占位），≠ 官方低库存费触发条件
+  calibration_status: 未校准
+
+# 店级经营预警：7 天销量窗、14 天可售风险提示；与 SKU 级补货分档是不同粒度。
+store_stock:
+  sales_window_days: 7
+  days_of_supply_alert: 14
+  calibration_status: 未校准
+
+competitor:
+  price_change_ratio: 0.03
+  bsr_change_ratio: 0.30
+  rating_drop: 0.2
+  gap_widen_usd: 5.0       # 我方到手价-竞对到手价较上一快照扩大至少 5 USD
+  gap_widen_ratio: 0.05   # 或按上一快照价差绝对值扩大至少 5%；上一价差为0时不算百分比
+  calibration_status: 未校准
+
+ads:
+  # 来源：通用广告经验值；时间窗：min_days_window=7 天滚动。
+  # 边界：高花费无单的绝对额 15 USD 是占位值，汽配客单价下必须用自己花费分布重算；
+  #       ACOS 容忍度相对盈亏线，不替代盈亏线本身（盈亏线要成本结构，当前未校准）。
+  acos_tolerance_over_breakeven: 0.15   # 高于盈亏线 15% 以内算正常波动
+  high_spend_no_order: 15.0             # 花费超过这个数且 0 单 → 必须处理；也用作 CPA 超标线（有单但单均花费超它 → watch 人工复核）
+  min_days_window: 7                    # 判断窗口，绝不用单日数据下结论
+  min_clicks_for_judgement: 8           # 搜索词自身点击数 ≥ 此值才按词判（低于它 CVR 波动太大）
+  root_min_clicks_for_judgement: 12     # 词根累计点击 ≥ 此值才允许词继承词根判断
+  negative_min_clicks: 2                # 低样本词触发否词建议的最小点击数
+  calibration_status: 未校准
+
+sales:
+  # 来源：运营调研页（workbuddy 分享，2026-11-04 读取）的"销量骤涨骤跌"任务 + 通用经验占位。
+  # 时间窗：只比 sales_daily 表里相邻的两个日期；样本范围：输入 sales_daily 表内 SKU 按天聚合（不等于公司全量）。
+  # 边界：只报方向不判原因；零销量后出单单列，不据此推断新品；窗口外日期与大促/站外单造成的波动都不剔除，需人工复核。
+  daily_drop_ratio: 0.50    # 最新日较前一日跌超 50% → 骤跌报警
+  daily_spike_ratio: 1.00  # 最新日较前一日涨超 100% → 骤涨报警
+  calibration_status: 未校准
+
+listing:
+  # 来源：亚马逊公开 listing 规范的通用长度惯例（字符数）。
+  # 时间窗：静态规范，不随时间衰减太久（6 个月复核，见 system/FRESHNESS.md）。
+  # 边界：字符数只筛明显偏离的标题，不判断关键词质量；图片像素/占比由 amz-listing-images 另判。
+  title_min_chars: 80
+  title_max_chars: 200
+  bullet_count_min: 5
+  bullet_max_chars: 500
+  description_min_chars: 200
+  main_image_min_side: 2000
+  background_white_ratio_min: 0.97   # 背景区域里"纯白"像素的最低占比（原硬编码在 img_check.py）
+  product_fill_ratio_min: 0.85
+  calibration_status: 未校准
+
+fitment:
+  # 来源：汽配主数据完整性的经验红线；样本范围：sku_master 全表。
+  # 边界：低于 90% 只表示"适配类分析先别做"，不是 listing 本身不合格。
+  min_oe_ratio: 0.90        # OE 号填写率低于 90%，适配类分析只出观察
+  min_year_ratio: 0.90      # 年款区间填写率
+  calibration_status: 未校准
+
+data:
+  # 来源：机制性参数（ freshness 提醒频率、缺失率判定线）。
+  # 边界：缺失率 20% 是"能不能出建议"的分界线，不是数据质量本身的目标。
+  max_age_days: 3           # 领星数据超过 3 天没更新，提示重导
+  missing_ratio_limit: 0.20 # 字段缺失率超过 20% 标记 degraded
+  calibration_status: 不适用
+
+calibration:
+  # 来源：自迭代机制参数（结案计数规则），与经营数据无关。
+  confirm_hits_to_promote: 3   # 同一规则被证实 3 次 → 升级为画像事实
+  refutes_to_demote: 2         # 被推翻 2 次 → 降权
+  min_hit_rate: 0.50           # 命中率低于此 → 只观察不建议
+  calibration_status: 不适用

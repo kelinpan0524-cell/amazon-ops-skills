@@ -1,0 +1,198 @@
+{
+  "_comment": "预警规则表。每条：id/name/enabled/level/条件阈值/给谁看/建议动作。阈值全部未校准（占位），改这里不用改代码。",
+  "rules": [
+    {
+      "id": "sales-drop",
+      "name": "销售额骤降",
+      "enabled": true,
+      "level": "high",
+      "window": "day",
+      "threshold": 0.3,
+      "why": "单日销售额较前一完整日跌超 30%，通常意味着断货/掉排名/竞对降价/Listing 被动",
+      "action": "先查库存是否归零 → 再看 Listing 是否被改 → 再看竞品价格"
+    },
+    {
+      "id": "sales-trend-down",
+      "name": "周趋势下滑",
+      "enabled": true,
+      "level": "medium",
+      "window": "week",
+      "threshold": 0.15,
+      "why": "最近 7 天合计较前 7 天跌超 15%，单日噪声已被平滑",
+      "action": "看周报的店铺贡献与 ACOS，判断是流量问题还是转化问题"
+    },
+    {
+      "id": "acos-high",
+      "name": "ACOS 偏高",
+      "enabled": true,
+      "level": "medium",
+      "window": "day",
+      "threshold": 0.18,
+      "calibration": {
+        "basis": "业务定调（ACOS >18% 就算很高）+ 自店历史交叉验证",
+        "history": "示例：用自己店近 12 个月 ACOS 的 P50/P75 定两档，别照抄别人的数字",
+        "note": "18% 比历史均值高约 4-5 个百分点，属确实偏高的水平；不是行业统一标准"
+      },
+      "why": "ACOS 超 18% 说明广告效率明显低于我们自己的常态；注意成本未校准，只能判效率不能判盈亏",
+      "action": "查高花费低转化的 campaign/搜索词，出否词或降价建议（人工执行）"
+    },
+    {
+      "id": "acos-critical",
+      "name": "ACOS 严重偏高",
+      "enabled": true,
+      "level": "high",
+      "window": "day",
+      "threshold": 0.25,
+      "calibration": {
+        "basis": "自店历史 P95 与业务经验取高者",
+        "note": "25% 以上不是波动，多半是投放跑偏（错匹配/竞价失控/Listing 转化崩）"
+      },
+      "why": "ACOS 超 25% 已远超常态，通常意味着投放方向或 Listing 出了问题",
+      "action": "当天就查：搜索词报告有没有跑偏、Listing 是否被改、库存是否断货限流"
+    },
+    {
+      "id": "spend-no-order",
+      "name": "有花费无订单",
+      "enabled": true,
+      "level": "high",
+      "window": "day",
+      "threshold": 50,
+      "why": "当日广告花费超 50 USD 且订单为 0，钱在空转",
+      "action": "当天就查该店广告活动，确认是否投放跑偏"
+    },
+    {
+      "id": "stock-risk",
+      "name": "断货风险",
+      "enabled": true,
+      "level": "high",
+      "window": "snapshot",
+      "threshold": 14,
+      "why": "FBA 可售件数 ÷ 近 7 日均销量 < 14 天（粗口径，仅 FBA）",
+      "action": "核对在途与本地仓，走补货流程（人工下单）"
+    },
+    {
+      "id": "stock-out",
+      "name": "已断货",
+      "enabled": true,
+      "level": "critical",
+      "window": "snapshot",
+      "threshold": 0,
+      "why": "FBA 可售为 0 但近 7 天有销量，说明正在掉排名",
+      "action": "当天处理：紧急补货 / 转 FBM / 调低广告预算止损"
+    },
+    {
+      "id": "data-fetch-failed",
+      "name": "数据拉取失败",
+      "enabled": true,
+      "level": "high",
+      "window": "snapshot",
+      "threshold": 1,
+      "why": "fetch_status 记录最近一次真实拉取失败；与官方尚未产出是不同故障，需要检查本机任务、网络和授权",
+      "action": "看 data/logs/fetch_status.json 与对应 fetch 日志，补跑 scripts/ops_doctor.py；连续失败先查授权"
+    },
+    {
+      "id": "data-stale",
+      "name": "数据断供",
+      "enabled": true,
+      "level": "high",
+      "window": "snapshot",
+      "threshold": 3,
+      "why": "领星 T+1：昨天的数据今天产出，最新=昨天属正常；≥3 天无新数据才疑似断供",
+      "action": "先查 data/logs/fetch_status.json：拉取失败查 Mac Mini 定时任务与授权；拉取成功则是官方未产出"
+    },
+    {
+      "id": "return-rate-watch",
+      "name": "退货率接近收费线",
+      "enabled": true,
+      "level": "medium",
+      "window": "day",
+      "threshold": 0.08,
+      "calibration": {
+        "basis": "逼近亚马逊官方收费线（9.1%）前的提前预警",
+        "history": "示例：近 12 个月退货率作为参考，官方收费线 9.1% 不要动",
+        "industry": "汽配车型专用件行业平均 12-18%；通用配件 5-8%；我们处于较好水平",
+        "note": "8% 略高于自店均值，是「接近红线」而不是「已经异常」"
+      },
+      "why": "退货率升到 8% 就意味着离亚马逊汽配收费线 9.1% 只差一点，要开始查原因了",
+      "action": "看退货原因分布；适配不符（占汽配退货约 18.7%）→ 查 fitment 数据准确性"
+    },
+    {
+      "id": "return-rate-critical",
+      "name": "退货率超官方收费线",
+      "enabled": true,
+      "level": "high",
+      "window": "month",
+      "threshold": 0.091,
+      "calibration": {
+        "basis": "亚马逊官方：Automotive & Powersports 类目退货率阈值 9.1%（2024-06-01 起）",
+        "rule": "退货率 = 发货当月 + 后两个日历月内的退货件数 ÷ 发货件数；超过阈值收退货处理费",
+        "exempt": "单月发货 <25 件豁免",
+        "note": "这是只有亚马逊能定的硬指标，不是我们的经验值——按季度审计，会直接影响费用"
+      },
+      "why": "超过 9.1% 会被收退货处理费（官方收费线，季度审计），是钱的问题不是面子问题",
+      "action": "立即归因：fitment 数据错误 / 尺码规格描述 / 质量问题 / 包装破损；同时核对是否触发收费（月发货 <25 件豁免）"
+    },
+    {
+      "id": "target-behind",
+      "name": "月度目标落后",
+      "enabled": true,
+      "level": "high",
+      "window": "mtd",
+      "min_progress": 0.4,
+      "critical_ratio": 0.6,
+      "threshold": 0.8,
+      "why": "看的是「当月达成率 ÷ 当月已过时间」而不是达成率本身：月初时间才过 13%，达成率当然低，那不是掉队。比值 <0.8 才算落后、<0.6 算严重落后。低于 40% 时间进度不判，避免月初误报。",
+      "action": "先看是流量掉了还是转化掉了（店铺日报 sessions/转化率）→ 再看广告是否停了/降预算 → 再看有没有断货或 Listing 被改。月底前还有天数，别为了凑数提前砸广告。"
+    },
+    {
+      "id": "gross-margin-low",
+      "name": "毛利率偏低",
+      "enabled": true,
+      "level": "high",
+      "window": "day",
+      "threshold": 0.15,
+      "why": "毛利率 = 领星口径（扣采购成本+FBA配送+佣金，不含头程）。低于 15% 时扣掉头程基本就亏了；实测我们中位 30%，15% 已经是很差的品。",
+      "action": "看这个 ASIN 的采购成本是不是录错了、售价是不是被压太低、退货率是不是高（退货的采购成本也要摊）。别直接涨价，先查清原因。"
+    },
+    {
+      "id": "gross-margin-negative",
+      "name": "毛利为负",
+      "enabled": true,
+      "level": "critical",
+      "window": "day",
+      "threshold": 0.0,
+      "why": "领星口径毛利已经为负 = 卖一单亏一单。实测 12% 的 ASIN 是这种状态，多半是 FBA 配送费吃掉（重货/大件）+ 售价过低。",
+      "action": "当天处理：先算清楚是配送费太高还是售价太低；该停广告止损，该调价就调（人工操作）。"
+    },
+    {
+      "id": "data-delay",
+      "name": "数据延迟",
+      "enabled": true,
+      "level": "low",
+      "window": "snapshot",
+      "threshold": 2,
+      "why": "最新数据为前天：昨日数据尚未产出，可能是领星延迟（T+1 波动），不一定是故障",
+      "action": "领星 T+1，通常次日产齐；若明天仍无更新再查定时任务与授权"
+    },
+    {
+      "id": "hijack-seller",
+      "name": "跟卖预警",
+      "enabled": true,
+      "level": "high",
+      "window": "snapshot",
+      "threshold": 1,
+      "why": "最新跟卖快照中 ASIN 卖家数>1 表示出现其他卖家抢 BuyBox",
+      "action": "打开跟卖报告核对卖家与价格，必要时调整 BuyBox 策略或投诉"
+    }
+  ],
+  "_removed": {
+    "yoy-drop": "2026-11-04 删除：同比下滑预警需要 13 个月以上历史，当前 shop_daily 不足；月同比改由 amz-week-month-review 的同比栏人工判断，不在预警里重复。若日后历史足够，按 sales-trend-down 的写法补回并加测试。"
+  },
+  "delivery": {
+    "_comment": "预警怎么送到人：critical/high 立即推飞书群；medium 汇总到日报末尾；low 只在报告里列。",
+    "critical": "immediate",
+    "high": "immediate",
+    "medium": "daily_digest",
+    "low": "report_only"
+  }
+}
